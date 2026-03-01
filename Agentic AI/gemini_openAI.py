@@ -12,7 +12,8 @@ client = OpenAI(
 response = client.chat.completions.create(
     model = "gemini-2.5-flash", 
     messages=[
-        {"role":"user", "content": "Hey I am Vivek Nice to meet you, who are you"}
+        {"role" : "system", "content": "you are an expert in maths and only and only answer maths related questions, and if the query is not related to maths just say sorry and dont answer"},
+        {"role" : "user", "content" : "hey can you help me solve a + b the whole square"}
     ]
 )
 
