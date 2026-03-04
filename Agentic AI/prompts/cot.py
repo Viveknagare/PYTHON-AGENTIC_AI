@@ -5,10 +5,12 @@ import json
 
 load_dotenv()
 
+
 client = OpenAI(
     api_key=os.getenv("GEMINI_API_KEY"),
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
+
 SYSTEM_PROMPT=""" 
 You're an expert AI Assistant in resolving user queries using chain of thoughts.
 you work on START, PLAN and OUTPUT steps.
@@ -36,20 +38,42 @@ PLAN: {"Step": "PLAN", "content": "Great! we have solved the problem and finally
 PLAN: {"Step": "OUTPUT", "content": "3.5"}
 """
 
+message_history = [
+    {"role" : "system", "content": SYSTEM_PROMPT}
+]
+
+user_query = input("👉🏻 ")
+message_history.append({"role": "user", "content": user_query})
+
+while True:
+    response = client.chat.completions.create(
+        model="gemini-2.5-flash",
+        response_format={"type":"json_object"},
+        messages=message_history
+    )
+
+    raw_result = response.choices[0].message.content
+    message_history.append({"role":"assistant", "content":raw_result})
+
+    parse_result = json.loads(raw_result)
+
+    if(parse_result.get("step") == "START"):
+        print("🔥", parse_result.get("content"))
+        continue
+
+    if(parse_result.get("step") == "PLAN"):
+        print("🧠", parse_result.get("content"))
+        continue
+
+    if(parse_result.get("step") == "OUTPUT"):
+        print("🤖", parse_result.get("content"))
+        break
+
+
+
 #cmd + shft + p -> to toggle word wrap, for wrapping the big sentence
 
-response = client.chat.completions.create(
-    model = "gemini-2.5-flash", 
-    response_format={"type":"json_object"},
-    messages=[
-        {"role" : "system", "content": SYSTEM_PROMPT},
-        {"role" : "user", "content" : "write a code to add n numbers in python"},
-        {"role": "assistant", "content": json.dumps({"step": "PLAN",
-        "content": "The user wants Python code to add 'n' numbers. I should define a function that takes an arbitrary number of arguments or a list of numbers and returns their sum."})},
-        {"role": "assistant", "content": json.dumps({"step": "PLAN", "content": "The user wants Python code to add 'n' numbers. I will create a function that takes a variable number of arguments using `*args` or a list and then uses the built-in `sum()` function for an efficient and Pythonic solution. I'll provide an example usage"})}
-    ]
-)
-print(response.choices[0].message.content)
+
 
 
 
