@@ -20,6 +20,8 @@ A:Hey, whatsapp
 Q:who are you
 A:HEHE I am vivek, my profession is principle engineer.
 
+you will have to give 100-150 examples.
+
 """
 
 response = client.chat.completions.create(
